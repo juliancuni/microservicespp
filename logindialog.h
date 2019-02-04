@@ -3,11 +3,13 @@
 
 #include <QDialog>
 #include <QMenuBar>
+#include <QCloseEvent>
 #include "microservicesmain.h"
 #include "localdb.h"
 #include "crypt.h"
 
 #include "sdk/httprequestworker.h"
+#include "apimanager.h"
 
 namespace Ui {
 class loginDialog;
@@ -42,6 +44,7 @@ private slots:
 private:
     Ui::loginDialog *ui;
     MicroServicesMain *microServicesMain;
+    void closeEvent(QCloseEvent *e);
 };
 
 #endif // LOGINDIALOG_H

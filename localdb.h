@@ -44,7 +44,8 @@ public:
                      "`password`	varchar ( 20 ) NOT NULL,"
                      "`apiId`	INTEGER NOT NULL,"
                      "`userIdApi`	TEXT NOT NULL,"
-                     "`access_token`	TEXT NOT NULL"
+                     "`access_token`	TEXT NOT NULL,"
+                     "`remember`	INTEGER"
                  ");");
 
             qry.exec("CREATE TABLE `apis` ("
@@ -77,6 +78,7 @@ public:
     {
         QSqlQuery qry;
         QString sql = "SELECT " + fushat + " FROM " + tabela + " " + kushtet + ";";
+//        qDebug() << sql;
         qry.prepare(sql);
         qry.exec();
         return qry;
@@ -86,16 +88,26 @@ public:
     {
         QSqlQuery qry;
         QString sql = "INSERT " + extraArg + " INTO " + tabela + "(" + fushat + ") VALUES(" + vlerat + ");";
+//        qDebug() << sql;
+        qry.prepare(sql);
+        qry.exec();
+        return qry;
+    }
+    //Delete
+    QSqlQuery del(QString tabela, QString fushat, QString vlerat)
+    {
+        QSqlQuery qry;
+        QString sql = "DELETE FROM " + tabela + " WHERE " + fushat + vlerat + ";";
         qDebug() << sql;
         qry.prepare(sql);
         qry.exec();
         return qry;
     }
-    //Insert
-    QSqlQuery del(QString tabela, QString field, QString value)
+    //Update
+    QSqlQuery update(QString tabela, QString fusha, QString vlera, QString kushtet)
     {
         QSqlQuery qry;
-        QString sql = "DELETE FROM " + tabela + " WHERE " + field + " = " + value + ";";
+        QString sql = "UPDATE " + tabela + " SET " + fusha + " = " + vlera + " " + kushtet +";";
         qDebug() << sql;
         qry.prepare(sql);
         qry.exec();

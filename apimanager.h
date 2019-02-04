@@ -39,9 +39,11 @@ private slots:
 
     void on_fshiApiBTN_clicked();
 
-    void on_httpRB_clicked();
+//    void on_httpRB_clicked();
 
-    void on_groupBox_clicked();
+//    void on_httpsRB_clicked();
+
+//    void on_groupBox_clicked();
 
 private:
     Ui::ApiManager *ui;

@@ -1,6 +1,5 @@
 #include "logindialog.h"
 //#include "microservicesmain.h"
-#include "apimanager.h"
 #include <QApplication>
 #include "localdb.h"
 
@@ -12,17 +11,30 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    ApiManager apiMan;
     loginDialog loginDialog;
+//    MicroServicesMain microServicesMain;
+//    QSqlQuery qryUser = lDB.select("*", "credentials", "");
+//    qryUser.exec();
+//    int numberOfRows = 0;
+//    if(qryUser.last())
+//    {
+//        numberOfRows =  qryUser.at() + 1;
+//        qryUser.first();
+//        qryUser.previous();
+//    }
+//    if(numberOfRows > 0) {
+//        while (qryUser.next()) {
+//            if(qryUser.value(5).toString().length() != 0) {
+//                microServicesMain.showMaximized();
+//            } else {
+//                loginDialog.show();
+//            }
+//        }
+//    } else {
+        loginDialog.show();
+//    }
 
-    QSqlQuery gjejApis =  lDB.select("count(*)","apis","");
-    while (gjejApis.next()) {
-        if(gjejApis.value(0).toInt() == 0)
-            apiMan.show();
-        else {
-            loginDialog.show();
-        }
-    }
+
 
     return a.exec();
 }
