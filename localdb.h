@@ -41,8 +41,11 @@ public:
             qry.exec("CREATE TABLE `credentials` ("
                      "`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,"
                      "`username`	varchar ( 20 ) NOT NULL,"
-                     "`password`	varchar ( 20 ) NOT NULL"
-                     ");");
+                     "`password`	varchar ( 20 ) NOT NULL,"
+                     "`apiId`	INTEGER NOT NULL,"
+                     "`userIdApi`	TEXT NOT NULL,"
+                     "`access_token`	TEXT NOT NULL"
+                 ");");
 
             qry.exec("CREATE TABLE `apis` ("
                      "`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,"
