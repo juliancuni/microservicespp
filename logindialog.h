@@ -7,6 +7,8 @@
 #include "localdb.h"
 #include "crypt.h"
 
+#include "sdk/httprequestworker.h"
+
 namespace Ui {
 class loginDialog;
 }
@@ -25,6 +27,8 @@ private slots:
 
     void on_fshiBTN_clicked();
 
+    void handle_api_result(HttpRequestWorker *worker);
+
     void on_listSessions_doubleClicked(const QModelIndex &index);
 
     void customMenuListSessions(QPoint pos);
@@ -35,7 +39,6 @@ private slots:
 
     void on_toolButton_clicked();
 
-    void dataInDaHouse(QByteArray data);
 private:
     Ui::loginDialog *ui;
     MicroServicesMain *microServicesMain;

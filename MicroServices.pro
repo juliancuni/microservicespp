@@ -29,14 +29,16 @@ SOURCES += \
         microservicesmain.cpp \
     logindialog.cpp \
     crypt.cpp \
-    apimanager.cpp
+    apimanager.cpp \
+    sdk/httprequestworker.cpp
 
 HEADERS += \
         microservicesmain.h \
     logindialog.h \
     localdb.h \
     crypt.h \
-    apimanager.h
+    apimanager.h \
+    sdk/httprequestworker.h
 
 FORMS += \
         microservicesmain.ui \

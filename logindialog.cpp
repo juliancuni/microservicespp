@@ -4,6 +4,7 @@
 static LocalDb lDB;
 static Crypt crypto(Q_UINT64_C(9835187522778933971));
 static QSqlQueryModel * credentialsModel = new QSqlQueryModel();
+static QString apiLink;
 
 loginDialog::loginDialog(QWidget *parent) :
     QDialog(parent),
@@ -14,9 +15,26 @@ loginDialog::loginDialog(QWidget *parent) :
     ui->listSessions->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->listSessions, SIGNAL(customContextMenuRequested(QPoint)), SLOT(customMenuListSessions(QPoint)));
 
-    QSqlQuery qry = lDB.select("username", "credentials", "");
-    credentialsModel->setQuery(qry);
+    QSqlQuery qryUser = lDB.select("username", "credentials", "");
+    credentialsModel->setQuery(qryUser);
     ui->listSessions->setModel(credentialsModel);
+
+    //Gjej te dhenat per api
+    QSqlQuery qryApi = lDB.select("*", "apis", "WHERE `default`=" + QString::number(1));
+
+    qryApi.exec();
+    if(qryApi.lastError().isValid()) {
+        ui->errLB->setText(qryApi.lastError().text());
+        return;
+    }
+    while (qryApi.next()) {
+        if(qryApi.value(3) == 0) {
+            apiLink = qryApi.value(1).toString() + "://" + qryApi.value(2).toString();
+        } else {
+            apiLink = qryApi.value(1).toString() + "://" + qryApi.value(2).toString() + ":" + qryApi.value(3).toString();
+        }
+    }
+
 }
 
 
@@ -46,16 +64,9 @@ void loginDialog::customMenuListSessions(QPoint pos){
 
 void loginDialog::on_loginBTN_clicked()
 {
-
+    //Validate input
     QString user = ui->userTB->text();
     QString pass = ui->passTB->text();
-
-//    QJsonObject obj{
-//      {"username", user},
-//      {"password", pass}
-//    };
-
-//    qDebug() << bAPI.request("GET", obj);
 
     if(user == "") {
         ui->errLB->setText("Kujdes! Username s'mund te lihet bosh");
@@ -69,34 +80,19 @@ void loginDialog::on_loginBTN_clicked()
     } else {
         ui->errLB->clear();
 
-//        QJsonObject obj = perdoruesApi.Login(user, pass);
-//        qDebug() << obj ;
     }
 
     //Login ne API dhe nese pergjigjet me te dhenat qe duhen ruaji te dhenat (tokens/user data) dhe pastaj ruaje ne localDB kete user.
 
+    QString apiUri = "/api/Perdoruesit/login";
 
-    if(ui->saveLogin->isChecked()) {
-        QString username = ui->userTB->text();
-        QString password = ui->passTB->text();
+    HttpRequestInput input(apiLink + apiUri, "POST");
+    input.add_var("username", user);
+    input.add_var("password", pass);
 
-        QString encryptPass = crypto.encryptToString(password);
-        QSqlQuery qry;
-        qry.prepare("INSERT OR REPLACE INTO credentials(username, password) VALUES('"+ username +"', '"+ encryptPass +"');");
-        qry.exec();
-        if(qry.lastError().isValid()) {
-//            qDebug() << "ERRRRR: " << qry.lastError().text();
-            ui->errLB->setText(qry.lastError().text());
-            return;
-        }
-        QSqlQuery qry1 = lDB.select("username", "credentials", "");
-        if(qry1.lastError().isValid()) {
-//            qDebug() << "ERRRRR: " << qry.lastError().text();
-            ui->errLB->setText(qry.lastError().text());
-            return;
-        }
-        credentialsModel->setQuery(qry1);
-    }
+    HttpRequestWorker *worker = new HttpRequestWorker(this);
+    connect(worker, SIGNAL(on_execution_finished(HttpRequestWorker*)), this, SLOT(handle_api_result(HttpRequestWorker*)));
+    worker->execute(&input);
 }
 
 void loginDialog::on_fshiBTN_clicked()
@@ -154,15 +150,41 @@ void loginDialog::slotFshiSession(QString fshiSess) {
     credentialsModel->setQuery(qry1);
 }
 
-
 void loginDialog::on_toolButton_clicked()
 {
 
 }
 
-void loginDialog::dataInDaHouse(QByteArray data)
-{
-    QString dataString;
-    dataString = data;
-    qDebug() << dataString;
+void loginDialog::handle_api_result(HttpRequestWorker *worker) {
+    QString msg;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        // communication was successful
+        msg = "Success - Response: " + worker->response;
+        if(ui->saveLogin->isChecked()) {
+            QString username = ui->userTB->text();
+            QString password = ui->passTB->text();
+
+            QString encryptPass = crypto.encryptToString(password);
+            QSqlQuery qry;
+            qry.prepare("INSERT OR REPLACE INTO credentials(username, password) VALUES('"+ username +"', '"+ encryptPass +"');");
+            qry.exec();
+            if(qry.lastError().isValid()) {
+                ui->errLB->setText(qry.lastError().text());
+                return;
+            }
+            QSqlQuery qry1 = lDB.select("username", "credentials", "");
+            if(qry1.lastError().isValid()) {
+                ui->errLB->setText(qry.lastError().text());
+                return;
+            }
+            credentialsModel->setQuery(qry1);
+        }
+    }
+    else {
+        // an error occurred
+        msg = "Error: " + worker->error_str;
+    }
+
+    QMessageBox::information(this, "", msg);
 }
